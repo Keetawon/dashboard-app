@@ -3,7 +3,7 @@ import { CONFIG } from '../constants/config.js';
 class ApiService {
   async fetchData(endpoint, params = {}) {
     try {
-      const url = new URL(`${CONFIG.API_BASE_URL}${endpoint}`);
+      const url = new URL(`${CONFIG.API_BASE_URL}${endpoint}`, window.location.origin);
       
       // Add query parameters
       Object.keys(params).forEach(key => {
@@ -12,28 +12,55 @@ class ApiService {
         }
       });
 
-      const response = await fetch(url);
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
       
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        let errorMessage = `HTTP error! status: ${response.status}`;
+        try {
+          const errorData = await response.json();
+          if (errorData.error) {
+            errorMessage += ` - ${errorData.error}`;
+          }
+        } catch {
+          // If response is not JSON, use status text
+          errorMessage += ` - ${response.statusText}`;
+        }
+        throw new Error(errorMessage);
       }
       
       return await response.json();
     } catch (error) {
       console.error('API fetch error:', error);
+      
+      // Provide more specific error messages
+      if (error.name === 'TypeError' && error.message.includes('fetch')) {
+        throw new Error('Unable to connect to the server. Please check if the application is running.');
+      }
+      
       throw error;
     }
   }
 
   async getAllData(filters = {}) {
-    const params = {
-      limit: 1000, // Get more data for frontend filtering
-      offset: 0,
-      ...filters
-    };
-    
-    const response = await this.fetchData('/data', params);
-    return response.data || [];
+    try {
+      const params = {
+        limit: 1000, // Get more data for frontend filtering
+        offset: 0,
+        ...filters
+      };
+      
+      const response = await this.fetchData('/data', params);
+      return response.data || [];
+    } catch (error) {
+      console.error('Failed to fetch data from API, using fallback:', error.message);
+      // Return empty array as fallback instead of crashing the app
+      return [];
+    }
   }
 
   async getRoomDetails(roomNumber) {
@@ -92,11 +119,27 @@ class ApiService {
   }
 
   async getStats() {
-    return await this.fetchData('/stats');
+    try {
+      return await this.fetchData('/stats');
+    } catch (error) {
+      console.error('Failed to fetch stats from API:', error.message);
+      return {
+        total_records: 0,
+        unique_projects: 0,
+        install_status_breakdown: {},
+        monthly_breakdown: [],
+        top_brands: {}
+      };
+    }
   }
 
   async getProjects() {
-    return await this.fetchData('/projects');
+    try {
+      return await this.fetchData('/projects');
+    } catch (error) {
+      console.error('Failed to fetch projects from API:', error.message);
+      return { projects: [] };
+    }
   }
 
   transformToReportData(rawData) {

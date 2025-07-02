@@ -15,15 +15,23 @@ class DashboardAPI(BaseHTTPRequestHandler):
         path = parsed_url.path
         query_params = parse_qs(parsed_url.query)
         
-        # Enable CORS
-        self.send_response(200)
-        self.send_header('Content-type', 'application/json')
-        self.send_header('Access-Control-Allow-Origin', '*')
-        self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
-        self.send_header('Access-Control-Allow-Headers', 'Content-Type')
-        self.end_headers()
-        
         try:
+            # Route validation
+            valid_endpoints = ['/api/stats', '/api/data', '/api/projects', '/api/status']
+            if path not in valid_endpoints:
+                self.send_error_response(404, "Endpoint not found", {
+                    "available_endpoints": valid_endpoints
+                })
+                return
+            
+            # Enable CORS
+            self.send_response(200)
+            self.send_header('Content-type', 'application/json')
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+            self.send_header('Access-Control-Allow-Headers', 'Content-Type')
+            self.end_headers()
+            
             if path == '/api/stats':
                 response = self.get_stats()
             elif path == '/api/data':
@@ -32,16 +40,24 @@ class DashboardAPI(BaseHTTPRequestHandler):
                 response = self.get_projects()
             elif path == '/api/status':
                 response = self.get_status_summary()
-            else:
-                response = {"error": "Endpoint not found", "available_endpoints": [
-                    "/api/stats", "/api/data", "/api/projects", "/api/status"
-                ]}
             
             self.wfile.write(json.dumps(response, ensure_ascii=False, indent=2).encode('utf-8'))
             
         except Exception as e:
-            error_response = {"error": str(e)}
-            self.wfile.write(json.dumps(error_response).encode('utf-8'))
+            self.send_error_response(500, "Internal server error", {"details": str(e)})
+    
+    def send_error_response(self, status_code, message, extra_data=None):
+        """Send structured error response"""
+        self.send_response(status_code)
+        self.send_header('Content-type', 'application/json')
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.end_headers()
+        
+        error_response = {"error": message}
+        if extra_data:
+            error_response.update(extra_data)
+        
+        self.wfile.write(json.dumps(error_response).encode('utf-8'))
     
     def do_OPTIONS(self):
         self.send_response(200)
@@ -92,20 +108,30 @@ class DashboardAPI(BaseHTTPRequestHandler):
         params = []
         
         if 'project_code' in query_params:
-            where_conditions.append("project_code = ?")
-            params.append(query_params['project_code'][0])
+            project_code = query_params['project_code'][0].strip()
+            if project_code:
+                where_conditions.append("project_code = ?")
+                params.append(project_code)
         
         if 'install_status' in query_params:
-            where_conditions.append("install_status = ?")
-            params.append(query_params['install_status'][0])
+            install_status = query_params['install_status'][0].strip()
+            if install_status:
+                where_conditions.append("install_status = ?")
+                params.append(install_status)
         
         if 'brand' in query_params:
-            where_conditions.append("brand = ?")
-            params.append(query_params['brand'][0])
+            brand = query_params['brand'][0].strip()
+            if brand:
+                where_conditions.append("brand = ?")
+                params.append(brand)
         
-        # Pagination
-        limit = int(query_params.get('limit', [100])[0])
-        offset = int(query_params.get('offset', [0])[0])
+        # Pagination with validation
+        try:
+            limit = min(int(query_params.get('limit', [100])[0]), 1000)  # Max 1000 records
+            offset = max(int(query_params.get('offset', [0])[0]), 0)    # Min 0
+        except (ValueError, IndexError):
+            limit = 100
+            offset = 0
         
         # Build final query
         base_query = """

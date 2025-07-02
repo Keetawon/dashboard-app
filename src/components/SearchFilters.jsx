@@ -102,7 +102,8 @@ const SearchFilters = ({ onFilterChange, initialFilters = {} }) => {
                   onClick={clearFilters}
                   className="px-8 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 focus:outline-none transition-all duration-200 font-semibold shadow-lg hover:shadow-xl flex items-center justify-center space-x-2"
                 >
-                  <span className="text-5xl">❌ล้างการค้นหา</span>
+                  <XMarkIcon className="h-5 w-5" />
+                  <span>ล้างการค้นหา</span>
                 </button>
               )}
             </div>

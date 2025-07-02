@@ -34,6 +34,7 @@ RUN apt-get update && \
     supervisor \
     cron \
     curl \
+    sqlite3 \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -45,7 +46,6 @@ WORKDIR /app
 
 # Copy Python files
 COPY simple_api.py data_sync_sqlite.py ./
-COPY dashboard.db ./
 
 # Copy frontend build from builder stage
 COPY --from=frontend-builder /app/dist ./frontend

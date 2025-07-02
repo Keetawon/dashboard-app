@@ -8,7 +8,7 @@ import os
 class SQLiteDataSync:
     def __init__(self, db_path="dashboard.db"):
         self.db_path = db_path
-        self.tsv_url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT5Qu2gRWD_hZX45QY1AyOK0Wl2QEKtR1yjMqQNWWUv7RuAPWwjLCsxsPSp7RcD0HU0tgeiXlwfRMB0/pub?gid=558973433&single=true&output=tsv"
+        self.tsv_url = os.getenv("GOOGLE_SHEETS_TSV_URL", "https://docs.google.com/spreadsheets/d/e/2PACX-1vT5Qu2gRWD_hZX45QY1AyOK0Wl2QEKtR1yjMqQNWWUv7RuAPWwjLCsxsPSp7RcD0HU0tgeiXlwfRMB0/pub?gid=558973433&single=true&output=tsv")
         
     def create_database(self):
         """Create SQLite database and table"""

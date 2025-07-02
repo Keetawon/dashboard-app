@@ -1,55 +1,24 @@
 import { Link } from 'react-router-dom';
+import ErrorCard from './common/ErrorCard';
+import LoadingCard from './common/LoadingCard';
+import EmptyCard from './common/EmptyCard';
 
 const RoomList = ({ data, isLoading, error }) => {
   if (isLoading) {
-    return (
-      <div className="grid gap-4 md:gap-6">
-        {[...Array(6)].map((_, index) => (
-          <div key={index} className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 animate-pulse">
-            <div className="flex items-start space-x-4">
-              <div className="w-12 h-12 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-xl flex items-center justify-center">
-                <div className="w-6 h-6 bg-blue-200 rounded"></div>
-              </div>
-              <div className="flex-1 space-y-3">
-                <div className="h-5 bg-gray-200 rounded-lg w-32"></div>
-                <div className="h-4 bg-gray-200 rounded w-48"></div>
-                <div className="h-4 bg-gray-200 rounded w-24"></div>
-              </div>
-              <div className="w-20 h-8 bg-gray-200 rounded-lg"></div>
-            </div>
-          </div>
-        ))}
-      </div>
-    );
+    return <LoadingCard />;
   }
 
   if (error) {
     return (
-      <div className="bg-gradient-to-br from-red-50 to-pink-50 border-2 border-red-200 rounded-2xl p-8 text-center">
-        <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <svg className="w-8 h-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
-          </svg>
-        </div>
-        <div className="text-red-700 font-semibold text-lg mb-2">เกิดข้อผิดพลาดในการโหลดข้อมูล</div>
-        <div className="text-red-600 text-sm">
-          {error.message || 'ไม่สามารถโหลดข้อมูลห้องได้ กรุณาลองใหม่อีกครั้ง'}
-        </div>
-      </div>
+      <ErrorCard
+        title="เกิดข้อผิดพลาดในการโหลดข้อมูล"
+        message={error.message || 'ไม่สามารถโหลดข้อมูลห้องได้ กรุณาลองใหม่อีกครั้ง'}
+      />
     );
   }
 
   if (!data || data.length === 0) {
-    return (
-      <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-2xl p-12 text-center">
-        <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
-        </div>
-        <div className="text-gray-600 font-semibold text-xl mb-3">ไม่พบข้อมูลห้อง</div>
-        <div className="text-gray-500">
-          ลองปรับเปลี่ยนตัวกรองการค้นหา หรือตรวจสอบข้อมูลใหม่ภายหลัง
-        </div>
-      </div>
-    );
+    return <EmptyCard title="ไม่พบข้อมูลห้อง" />;
   }
 
   return (

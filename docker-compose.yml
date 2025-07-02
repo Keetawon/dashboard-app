@@ -9,6 +9,7 @@ services:
       - "8080:80"
     environment:
       - TZ=Asia/Bangkok
+      - GOOGLE_SHEETS_TSV_URL=https://docs.google.com/spreadsheets/d/e/2PACX-1vT5Qu2gRWD_hZX45QY1AyOK0Wl2QEKtR1yjMqQNWWUv7RuAPWwjLCsxsPSp7RcD0HU0tgeiXlwfRMB0/pub?gid=558973433&single=true&output=tsv
     volumes:
       - dashboard_data:/app/dashboard.db
     restart: unless-stopped

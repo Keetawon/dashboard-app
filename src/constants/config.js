@@ -1,6 +1,6 @@
 // Application configuration constants
 export const CONFIG = {
-  API_BASE_URL: 'http://localhost:3001/api',
+  API_BASE_URL: '/api',
   
   QUERY_CONFIG: {
     STALE_TIME: 5 * 60 * 1000, // 5 minutes

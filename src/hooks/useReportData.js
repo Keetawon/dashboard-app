@@ -12,7 +12,7 @@ export const useReportData = (searchFilters = {}) => {
         const rawData = await apiService.getAllData();
         return apiService.transformToReportData(rawData);
       } catch (error) {
-        console.warn('Error fetching data from API, using mock data:', error);
+        console.error('Error fetching data from API, using mock data:', error);
         return apiService.getMockData();
       }
     },
@@ -44,7 +44,7 @@ export const useRoomDetails = (roomNumber) => {
       try {
         return await apiService.getRoomDetails(roomNumber);
       } catch (error) {
-        console.warn('Error fetching room details:', error);
+        console.error('Error fetching room details:', error);
         return { roomInfo: null, items: [] };
       }
     },
